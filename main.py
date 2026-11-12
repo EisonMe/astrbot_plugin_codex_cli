@@ -18,7 +18,7 @@ TOOLS = ("codex_cli_start", "codex_cli_status", "codex_cli_cancel")
 
 
 @register(
-    "astrbot_plugin_codex_cli", "EisonMe", "System Codex CLI task bridge", "0.3.1"
+    "astrbot_plugin_codex_cli", "EisonMe", "System Codex CLI task bridge", "0.3.2"
 )
 class CodexCliPlugin(Star):
     """Run long CLI tasks independently of individual model tool requests."""

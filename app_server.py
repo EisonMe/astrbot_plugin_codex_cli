@@ -42,14 +42,23 @@ class AppServerClient:
             raise ValueError("桌面联动需要本机 Unix socket；此系统请使用 CLI 模式。")
         path = Path(self.socket_path).expanduser() if self.socket_path else None
         if path is None:
-            directory = Path(tempfile.gettempdir()) / f"codex-daemon-{os.getuid()}"
-            candidates = [p for p in directory.glob("*") if p.is_socket()]
+            # A service may override TMPDIR while the desktop still uses /tmp.
+            directories = {
+                (base / f"codex-daemon-{os.getuid()}").resolve()
+                for base in (Path(tempfile.gettempdir()), Path("/tmp"))
+            }
+            candidates = {
+                p.resolve()
+                for directory in directories
+                for p in directory.glob("*")
+                if p.is_socket()
+            }
             if len(candidates) != 1:
                 raise ValueError(
                     "找不到唯一的 Codex 应用 socket，请先连接本机 Codex 应用，"
                     "或配置 app_server_socket。"
                 )
-            path = candidates[0]
+            path = candidates.pop()
         if not path.is_absolute() or not path.is_socket():
             raise ValueError("Codex 应用 socket 不存在，请检查 app_server_socket。")
         self.session = aiohttp.ClientSession(
@@ -64,7 +73,7 @@ class AppServerClient:
             await self.request(
                 "initialize",
                 {
-                    "clientInfo": {"name": "astrbot_codex", "version": "0.3.1"},
+                    "clientInfo": {"name": "astrbot_codex", "version": "0.3.2"},
                     "capabilities": {"experimentalApi": True},
                 },
             )

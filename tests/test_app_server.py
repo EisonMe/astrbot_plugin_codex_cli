@@ -11,6 +11,7 @@ from types import SimpleNamespace
 import pytest
 import pytest_asyncio
 from aiohttp import web
+from astrbot_plugin_codex_cli.app_server import AppServerClient
 from astrbot_plugin_codex_cli.runner import CodexRunner
 
 THREAD = "22222222-2222-4222-8222-222222222222"
@@ -307,3 +308,61 @@ async def test_missing_socket_fails_without_launching_invisible_cli(desktop):
     assert job["status"] == "failed"
     assert state.starts == 0
     assert not runner.processes
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("location", ["system", "service", "ambiguous"])
+async def test_socket_discovery_with_service_tmpdir(tmp_path, monkeypatch, location):
+    """Find the desktop outside a service TMPDIR without guessing among sockets."""
+    import os
+    import socket
+
+    from astrbot_plugin_codex_cli import app_server
+
+    service_tmp = tmp_path / "service"
+    system_socket = tmp_path / "desktop.sock"
+    service_socket = service_tmp / f"codex-daemon-{os.getuid()}" / "app.sock"
+    sockets = []
+    for path in (
+        [system_socket, service_socket]
+        if location == "ambiguous"
+        else [system_socket if location == "system" else service_socket]
+    ):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        sock = socket.socket(socket.AF_UNIX)
+        sock.bind(str(path))
+        sockets.append(sock)
+    monkeypatch.setattr(app_server.tempfile, "gettempdir", lambda: str(service_tmp))
+    original_glob = Path.glob
+
+    def isolated_glob(path, pattern):
+        if path == Path("/tmp") / f"codex-daemon-{os.getuid()}":
+            return iter([system_socket]) if system_socket.exists() else iter([])
+        return original_glob(path, pattern)
+
+    monkeypatch.setattr(Path, "glob", isolated_glob)
+    connected = []
+
+    class DiscoveryFinished(Exception):
+        pass
+
+    def connector(*, path):
+        connected.append(path)
+        raise DiscoveryFinished
+
+    monkeypatch.setattr(app_server.aiohttp, "UnixConnector", connector)
+    client = AppServerClient("", lambda _: None)
+    try:
+        if location == "ambiguous":
+            with pytest.raises(ValueError, match="唯一"):
+                await client.connect()
+            assert not connected
+        else:
+            with pytest.raises(DiscoveryFinished):
+                await client.connect()
+            assert connected == [
+                str(system_socket if location == "system" else service_socket)
+            ]
+    finally:
+        for sock in sockets:
+            sock.close()

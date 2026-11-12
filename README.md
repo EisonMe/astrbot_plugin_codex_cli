@@ -99,7 +99,7 @@ systemd 或 Docker 服务可能没有终端中的环境变量。独立 CLI 模�
 
 任务会以 `AstrBot · 任务内容` 显示，可通过 `task_title_prefix` 修改前缀。应用里可看到流式进度、命令和文件变动；`/codex status` 返回对应的 `session_id` 和 `app_thread_name`。继续任务使用同一个 Codex 会话。
 
-`app_server_socket` 留空时自动发现当前用户唯一的默认 socket。存在多个服务时，需要明确填写目标 socket。找不到服务会直接报错。桌面模式使用共享服务已有的登录、提供商环境和配置；`environment_file` 无法向已经运行的共享服务注入环境变量。`model`、`sandbox` 和工作目录仍按插件配置应用。
+`app_server_socket` 留空时自动发现当前用户唯一的默认 socket，同时检查服务临时目录和系统 `/tmp`，支持 systemd 自定义 `TMPDIR` 的情况。存在多个服务时，需要明确填写目标 socket。找不到服务会直接报错。桌面模式使用共享服务已有的登录、提供商环境和配置；`environment_file` 无法向已经运行的共享服务注入环境变量。`model`、`sandbox` 和工作目录仍按插件配置应用。
 
 取消和超时通过 `turn/interrupt` 停止所属任务，不终止共享服务。连接丢失后不会自动重发任务，避免重复执行。AstrBot 异常退出后，桌面任务可能仍在运行：请先在桌面确认状态；插件继续原会话前也会检查是否仍在执行。
 
