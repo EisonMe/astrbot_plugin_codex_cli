@@ -1,0 +1,7 @@
+name: astrbot_plugin_codex_cli
+display_name: Codex CLI 系统任务
+desc: 调用系统 Codex，支持桌面实时联动、后台任务完成主动回报、结果查询、继续会话和取消。
+version: 0.3.1
+author: EisonMe
+repo: https://github.com/EisonMe/astrbot_plugin_codex_cli
+astrbot_version: ">=4.23.1"

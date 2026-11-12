@@ -1,0 +1,15 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+.ruff_cache/
+.venv/
+dist/
+*.egg-info/
+environment.json
+job.json
+events.jsonl
+result.txt
+notification.json
+.env
+.env.*
+data/

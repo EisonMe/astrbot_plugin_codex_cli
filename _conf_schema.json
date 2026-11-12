@@ -1,0 +1,17 @@
+{
+  "enabled": {"description": "启用系统 Codex CLI 工具", "type": "bool", "default": true},
+  "codex_path": {"description": "Codex CLI 可执行文件路径；也可填写 PATH 内的 codex", "type": "string", "default": "codex"},
+  "desktop_link": {"description": "连接本机 Codex 应用的共享任务服务，在桌面实时显示任务、进度和结果；默认关闭，使用独立 codex exec。应用模式使用共享服务已有的登录和提供商环境", "type": "bool", "default": false},
+  "app_server_socket": {"description": "Codex 应用 Unix socket 绝对路径；留空自动查找当前用户的唯一 socket。需与桌面连接同一台主机、同一用户", "type": "string", "default": ""},
+  "task_title_prefix": {"description": "Codex 桌面任务名称前缀，可改为自己的机器人名字", "type": "string", "default": "AstrBot"},
+  "default_workdir": {"description": "默认工作目录；留空使用 AstrBot 工作目录", "type": "string", "default": ""},
+  "model": {"description": "Codex 使用的模型；留空继承系统 CLI 配置，与 AstrBot 聊天模型独立", "type": "string", "default": ""},
+  "sandbox": {"description": "执行权限；inherit 继承本机 Codex 配置，非交互执行固定不等待批准", "type": "string", "default": "inherit", "options": ["inherit", "read-only", "workspace-write", "danger-full-access"]},
+  "environment_file": {"description": "可选本地 JSON 环境变量文件绝对路径，例如包含 CLI 自定义提供商所需的 API Key。凭据不填写在此配置中，文件权限设为 600", "type": "string", "default": ""},
+  "allowed_users": {"description": "额外授权的身份，格式：平台ID:用户ID。留空仅允许 AstrBot 管理员", "type": "list", "default": []},
+  "allow_group": {"description": "允许授权用户在群内调用；默认仅私聊", "type": "bool", "default": false},
+  "allowed_workdirs": {"description": "允许的工作目录根路径；留空不限制工作目录。仅控制启动目录，实际文件访问范围由 CLI sandbox 决定", "type": "list", "default": []},
+  "timeout_seconds": {"description": "单个后台任务最长执行秒数，超过后终止任务及其子进程", "type": "int", "default": 3600},
+  "max_concurrent_jobs": {"description": "同时执行的任务数量，默认 1，避免多个任务同时改写文件", "type": "int", "default": 1},
+  "initial_wait_seconds": {"description": "启动时等待结果的秒数，最长 20 秒；之后自动转后台，不受单次工具调用超时影响", "type": "int", "default": 10}
+}
